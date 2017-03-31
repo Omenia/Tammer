@@ -4,3 +4,4 @@ python_packages:
   - nose
   - mock
   - robotframework
+  - robotframework-selenium2library
