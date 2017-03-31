@@ -1,0 +1,20 @@
+- name: Install Jenkins plugins
+  jenkins_plugin:
+    name: "{{ item }}"
+    state: present
+    url: "{{ jenkins_address }}"
+    url_username: "{{ jenkins_username }}"
+    url_password: "{{ jenkins_password }}"
+    updates_expiration: 0 # workaround for a bug in the module
+  with_items:
+    "{{ jenkins_plugins }}"
+  register: plugins_installed
+
+- include: jenkins_restart.yml
+  when: plugins_installed.changed
+
+- name: Configure security realm for Google login
+  template:
+    src: google_login.groovy
+    dest: "{{ jenkins_home }}/init.groovy.d/google_login.groovy"
+  register: plugin_config

@@ -1,0 +1,4 @@
+psutil==2.2.1
+robotframework>=2.8.7
+robotframework-selenium2library>=1.7.0
+Pillow>=2.8.0

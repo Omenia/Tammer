@@ -1,0 +1,8 @@
+- name: Create Jenkins jobs
+  jenkins_job:
+    name: "{{ item }}"
+    config: "{{ lookup('file', 'jobs/{{ item }}/config.xml') }}"
+    url: "{{ jenkins_address }}"
+    user: "{{ jenkins_username }}"
+    password: "{{ jenkins_password }}"
+  with_items: "{{ jenkins_jobs }}"

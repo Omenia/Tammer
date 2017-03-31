@@ -1,0 +1,38 @@
+html, body {
+    height: 100%;
+}
+
+.top_buffer {
+    margin-top: 5vh;
+}
+
+#chart {
+    width: 100%;
+    height: 80%;
+}
+
+svg {
+    width: 100%;
+    height: 100%;
+}
+
+.container-fluid {
+    height:100%;
+}
+
+#ologo {
+    position: absolute;
+    left: 7%;
+    top: 5vh;
+    height: 20%;
+    width: 4%;
+    background-image: url("img/logo.png");
+    background-position: left top;
+    background-repeat: no-repeat;
+    background-size: 30px 30px;
+    display: block;
+}
+
+#chartNotFound {
+    color: red;
+}

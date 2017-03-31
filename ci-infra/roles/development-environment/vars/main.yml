@@ -1,0 +1,6 @@
+python_packages:
+  - python-jenkins
+  - gitpython
+  - nose
+  - mock
+  - robotframework

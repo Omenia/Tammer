@@ -1,0 +1,5 @@
+include src/tammer/*.conf
+include src/tammer/css/*.css
+include src/tammer/css/img/*.png
+include src/tammer/js/*.js
+include src/tammer/static/*.html

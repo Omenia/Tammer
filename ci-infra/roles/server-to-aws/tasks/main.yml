@@ -1,0 +1,88 @@
+---
+- name: find current Linux AMI in this region
+  ec2_ami_find:
+    aws_access_key: "{{ ec2_access_key }}"
+    aws_secret_key: "{{ ec2_secret_key }}"
+    region: "{{ target_aws_region }}"
+    name: "{{ ami_name }}"
+    no_result_action: fail
+    sort: name
+    sort_order: descending
+  register: found_amis
+
+- set_fact:
+    linux_ami_id: "{{ (found_amis.results | first).ami_id  }}"
+
+- name: ensure security group is present
+  ec2_group:
+    aws_access_key: "{{ ec2_access_key }}"
+    aws_secret_key: "{{ ec2_secret_key }}"
+    name: "{{ security_group }}"
+    description: security group
+    region: "{{ target_aws_region }}"
+    rules:
+    - proto: tcp
+      from_port: 80
+      to_port: 80
+      cidr_ip: 0.0.0.0/0
+    - proto: tcp
+      from_port: 22
+      to_port: 22
+      cidr_ip: 0.0.0.0/0
+    rules_egress:
+    - proto: -1
+      cidr_ip: 0.0.0.0/0
+  register: sg_out
+
+- name: ensure instances are running
+  ec2:
+    key_name: "{{ ssh_key }}"
+    aws_access_key: "{{ ec2_access_key }}"
+    aws_secret_key: "{{ ec2_secret_key }}"
+    region: "{{ target_aws_region }}"
+    image: "{{ linux_ami_id }}"
+    instance_type: "{{ instance_type }}"
+    group_id: "{{ sg_out.group_id }}"
+    wait: yes
+    exact_count: "{{ number_of_instances }}"
+    volumes:
+      - device_name: /dev/xvda
+        volume_size: "{{ volume_size }}"
+        device_type: gp2
+        delete_on_termination: True
+    count_tag:
+      Name: "{{ tag }}"
+    instance_tags:
+      Name: "{{ tag }}"
+  register: ec2_result
+
+# Elastic IP to allow automatic configuration of the Jenkins google-login plugin.
+- name: Associate an elastic IP with the instance
+  ec2_eip:
+    device_id: "{{ item.id }}"
+    public_ip: "{{ elastic_public_ip }}"
+    aws_access_key: "{{ ec2_access_key }}"
+    aws_secret_key: "{{ ec2_secret_key }}"
+    region: "{{ target_aws_region }}"
+  with_items: "{{ ec2_result.tagged_instances }}"
+
+- name: Add hosts to groups
+  add_host:
+    name: "linux-temp-{{ item.id }}"
+    ansible_ssh_host: "{{ elastic_public_ip }}"
+    groups: "{{ group }}"
+    ec2_id: "{{ item.id }}"
+  changed_when: false
+  with_items: "{{ ec2_result.tagged_instances }}"
+
+- name: Wait for the elastic IP to be associated
+  pause:
+    seconds: 15
+
+- name: Wait for SSH to come up
+  wait_for:
+    port: 22
+    host: "{{ elastic_public_dns }}"
+    delay: 5
+    timeout: 180
+    state: started

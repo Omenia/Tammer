@@ -1,0 +1,15 @@
+- name: Install ufw
+  apt:
+    name: ufw
+    state: latest
+
+- name: Allow SSH
+  ufw:
+    rule: allow
+    port: 22
+    proto: tcp
+
+- name: Activate, deny everything that's not previously allowed (ICMP allowed by ufw defaults)
+  ufw:
+    state: enabled
+    policy: deny

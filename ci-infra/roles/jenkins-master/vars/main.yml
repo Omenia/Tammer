@@ -1,0 +1,39 @@
+jenkins_home: /var/lib/jenkins
+jenkins_host: localhost
+jenkins_http_port: 8080
+jenkins_address: "http://{{ jenkins_host }}:{{ jenkins_http_port }}"
+jenkins_cli: "{{ jenkins_home }}/jenkins-cli.jar"
+jenkins_username: "{{ vault_jenkins_username }}"
+jenkins_password: "{{ vault_jenkins_password }}"
+jenkins_plugins:
+  - bitbucket
+  - build-environment
+  - build-monitor-plugin
+  - buildgraph-view
+  - cvs
+  - git
+  - git-parameter
+  - google-login
+  - google-oauth-plugin
+  - jenkins-flowdock-plugin
+  - jenkins-multijob-plugin
+  - jobConfigHistory
+  - locale
+  - node-iterator-api
+  - robot
+  - scm-sync-configuration
+  - ssh-slaves
+  - translation
+jenkins_jobs:
+  - Tammer
+  - Tammer-Codeanalysis
+  - Tammer-DeploytoProd
+  - Tammer-DeploytoPyPi
+  - Tammer-DeployToTestEnv
+  - Tammer-RunAcceptanceTests
+  - Tammer-RunUnitTests
+  - Tammer-testbed
+google_clientid: "{{ vault_google_clientid }}"
+google_secret: "{{ vault_google_secret }}"
+google_auth_domain: "{{ vault_google_auth_domain }}"
+deploy_ssh_key_file: "{{ jenkins_home }}/.ssh/id_rsa"

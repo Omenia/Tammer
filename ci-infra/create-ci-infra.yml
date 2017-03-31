@@ -1,0 +1,21 @@
+---
+- name: create Linux jenkins ec2 instance
+  hosts: localhost
+  vars_files:
+    - secret.yml
+  user: admin
+  gather_facts: False
+  roles:
+    - server-to-aws
+
+- name: create Jenkins master configuration
+  hosts: tammer-jenkins-master
+  vars_files:
+    - secret.yml
+  user: admin
+  become: yes
+  roles:
+    - firewall
+    - base-configuration
+    - development-environment
+    - jenkins-master

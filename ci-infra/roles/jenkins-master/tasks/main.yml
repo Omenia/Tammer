@@ -1,0 +1,67 @@
+- name: Add Jenkins Debian repository key
+  apt_key: url=https://jenkins-ci.org/debian/jenkins.io.key
+
+- name: Add Jenkins Debian repository
+  apt_repository: repo='deb http://pkg.jenkins.io/debian binary/'
+                  update_cache=no
+
+- name: Update Debian repository cache
+  apt: update_cache=yes
+
+- name: Install Jenkins
+  apt: name=jenkins state=present
+
+- name: Configure Jenkins HTTP Port
+  lineinfile: dest=/etc/default/jenkins regexp=^HTTP_PORT= line=HTTP_PORT={{ jenkins_http_port }}
+
+- name: Disable Content Security Policy (Workaround for Robot Framework Plugin)
+  lineinfile: dest=/etc/default/jenkins
+              insertafter="^JAVA_ARGS=.*"
+              line="JAVA_ARGS=\"${JAVA_ARGS} -Dhudson.model.DirectoryBrowserSupport.CSP=\\"sandbox allow-scripts allow-same-origin; default-src \'none\'; img-src \'self\' data{{':'}} ; style-src \'self\' \'unsafe-inline\' data{{':'}} ; script-src \'self\' \'unsafe-inline\' \'unsafe-eval\' ;\\"\""
+              state=present
+
+- name: Unlock jenkins UI
+  lineinfile: dest=/etc/default/jenkins
+              insertafter="^JAVA_ARGS=.*"
+              line="JAVA_ARGS=\"${JAVA_ARGS} -Djenkins.install.runSetupWizard=false\""
+              state=present
+
+- name: Create directory for Jenkins init scripts
+  file:
+    path: "{{ jenkins_home }}/init.groovy.d"
+    state: directory
+    owner: jenkins
+    group: jenkins
+    mode: 0775
+
+- name: Create user for Jenkins
+  template:
+    src: basic_security.groovy
+    dest: "{{ jenkins_home }}/init.groovy.d/basic_security.groovy"
+
+- include: jenkins_restart.yml
+
+- name: Download Jenkins CLI
+  get_url: url="{{ jenkins_address }}/jnlpJars/jenkins-cli.jar"
+           dest={{ jenkins_cli }}
+           owner=jenkins group=jenkins mode=600
+
+- name: Create ssh key pair for Jenkins
+  user:
+    name: jenkins
+    generate_ssh_key: yes
+    ssh_key_file: "{{ deploy_ssh_key_file }}"
+
+- include: plugins.yml
+- include: jobs.yml
+- include: jenkins_restart.yml
+
+- name: Delete Jenkins security init scripts
+  file:
+    path: "{{ jenkins_home }}/init.groovy.d/{{ item }}"
+    state: absent
+  with_items:
+    - basic_security.groovy
+    - google_login.groovy
+
+- include: http_server.yml

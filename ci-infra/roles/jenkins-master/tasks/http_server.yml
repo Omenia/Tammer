@@ -1,0 +1,22 @@
+- name: Install nginx
+  apt: name=nginx
+
+- name: Remove nginx default configuration sites-available
+  file: name=/etc/nginx/sites-available/default state=absent
+
+- name: Remove nginx default configuration sites-enabled
+  file: name=/etc/nginx/sites-enabled/default state=absent
+
+- name: Copy over port-forwarding template for Jenkins
+  template: src=etc/nginx/sites-available/jenkins.j2 dest=/etc/nginx/sites-available/jenkins
+
+- name: Take port-forwarding template for Jenkins in to use
+  file: src=/etc/nginx/sites-available/jenkins
+        dest=/etc/nginx/sites-enabled/jenkins
+        state=link
+
+- name: Allow HTTP in the Firewall
+  ufw: rule=allow name='Nginx HTTP'
+
+- name: Restart nginx
+  service: name=nginx state=restarted
