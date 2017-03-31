@@ -9,7 +9,10 @@
   apt: update_cache=yes
 
 - name: Install Jenkins
-  apt: name=jenkins state=present
+  apt:
+    name: jenkins
+    state: present
+    update_cache: yes
 
 - name: Configure Jenkins HTTP Port
   lineinfile: dest=/etc/default/jenkins regexp=^HTTP_PORT= line=HTTP_PORT={{ jenkins_http_port }}
@@ -46,12 +49,7 @@
            dest={{ jenkins_cli }}
            owner=jenkins group=jenkins mode=600
 
-- name: Create ssh key pair for Jenkins
-  user:
-    name: jenkins
-    generate_ssh_key: yes
-    ssh_key_file: "{{ deploy_ssh_key_file }}"
-
+- include: github_config.yml
 - include: plugins.yml
 - include: jobs.yml
 - include: jenkins_restart.yml
