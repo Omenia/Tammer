@@ -52,7 +52,7 @@ class TestGitAnalyzer(unittest.TestCase):
                 'charts': {
                         'Prototype': [
                             ['ID', 'Age', 'Gap', 'Conflicts', 'Inventory'],
-                            ['foo', 16892, 144980, 0, 144980]
+                            ['foo', 17256, 144980, 0, 144980]
                         ],
                         'Original': [
                             ['ID', 'Gap', 'Inventory', 'Conflicts'],
