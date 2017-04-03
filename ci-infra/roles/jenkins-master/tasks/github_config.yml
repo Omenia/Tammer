@@ -22,3 +22,4 @@
       Content-Type: application/json
       Authorization: "token {{ vault_github_token }}"
   when: ssh_key_created.changed
+  no_log: true
